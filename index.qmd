@@ -1,0 +1,569 @@
+---
+title: "AY 2022 Match"
+author: 
+  name: "Kurtis A. Pivert, MS"
+  orcid: 0000-0002-3428-2427
+date: "2022-11-30"
+categories: [match, fellow, brief]
+google-scholar: true
+citation: 
+  author:
+    - name: Kurtis A. Pivert
+      orcid: 0000-0002-3428-2427
+description: |
+  This is Headline Takeaway 
+execute: 
+  echo: false
+  warning: false
+  message: false
+image: "ay_2022_match.png"
+---
+
+```{r}
+#| label: packages
+
+# require(ggiraph)
+require(DT)
+# library(rio)
+library(sparkline)
+library(htmlwidgets)
+library(readxl)
+require(extrafont)
+loadfonts(quiet = TRUE)
+require(highcharter)
+require(tidyverse)
+```
+
+```{r}
+#| label: themes
+
+## ggplot
+
+theme_set(
+  theme_minimal(
+    base_size = 12, 
+    base_family = "Gotham"
+    ) # +
+  # theme(
+  #   panel.background = element_rect(fill = "#f5f5f5", color = "#f5f5f5"),
+  #   plot.background = element_rect(fill = "#f5f5f5", color = "#f5f5f5")
+  # )
+)
+
+## highchartr
+
+# TK
+```
+
+```{r}
+#| label: data
+
+df <- read_excel(
+  "00_data.xlsx",
+  na = "NA"
+)
+
+df_long <- df %>% 
+  pivot_longer(
+    names_to = "Year",
+    values_to = "Value",
+    -Variable
+  ) %>% 
+  mutate(
+    Year = parse_number(Year)
+  )
+
+df_wide <- df_long %>% 
+  pivot_wider(
+    names_from = Variable, 
+    values_from = Value
+    )
+
+```
+
+```{r}
+#| label: functions
+
+# Time Period Over Previous Time Period
+
+pct_chg <- function(x) {
+  
+  y <- lag(x)
+  
+  z <- ((x - y) / y) %>% 
+    replace(., is.na(.), 0)
+  
+  z
+  
+}
+
+# Normalize from Baseline
+
+pct_norm <- function(x) {
+  
+  y <- x[1]
+  
+  z <- ((x - y) / y) %>% 
+    replace(., is.na(.), 0)
+  
+  z
+  
+}
+```
+
+## Executive Summary
+
+TK.
+
+### AY 2023 Match Key Data Points
+
+-   One
+
+-   Two
+
+-   Three
+
+## Match Results in Detail
+
+### Fellows
+
+TK. This includes a citation to (see [Table 1](#tab1)).
+
+#### Table 1: Nephrology Candidate Trends AY 2018--AY 2023\* {#tab1}
+
+```{r}
+spk_df_fellows <- 
+  df_long %>% 
+  filter(
+    between(Year, 2018, 2023),
+    Variable %in% c(
+      "Total Applicants", "Applicants Prefer Nephrology",
+      "Applicants Prefer Nephrology Matched", "Applicants Matched Other",
+      "Applicants Did Not Match", "Total Matched",
+      "US MD Matched", "DO Matched", "US-IMG Matched", "IMG Matched",
+      "Canadian Matched", "Fifth Pathway Matched"     
+      )
+    ) %>% 
+  group_by(Variable) %>%
+  summarize(
+    TrendSparkline = spk_chr(
+      Value,
+      type = "line",
+      chartRangeMin = 0, 
+      chartRangeMax = max(Value)
+    )
+  )
+
+spk_df_fellows <- 
+  df_long %>% 
+  filter(
+    between(Year, 2018, 2023),
+    Variable %in% c(
+      "Total Applicants", "Applicants Prefer Nephrology",
+      "Applicants Prefer Nephrology Matched", "Applicants Matched Other",
+      "Applicants Did Not Match", "Total Matched",
+      "US MD Matched", "DO Matched", "US-IMG Matched", "IMG Matched",
+      "Canadian Matched", "Fifth Pathway Matched"     
+      )
+    ) %>% 
+  mutate(
+    Year = str_c("AY_", Year)
+  ) %>% 
+  pivot_wider(
+    names_from = Year, 
+    values_from = Value
+  ) %>% 
+  left_join(
+    spk_df_fellows
+  ) 
+
+ datatable(
+   spk_df_fellows, 
+   rownames = FALSE,
+   escape = FALSE, 
+   filter = "none",
+   extensions = "FixedColumns",
+   options = list(
+     paging = FALSE,
+     ordering = FALSE,
+     dom = 't', 
+     initComplete = JS(
+       "function(settings, json) {",
+       "$('body').css({'font-family': 'Gotham'});",
+       "}"
+      )
+     ),
+   colnames = names(spk_df_fellows) %>% 
+     str_replace(
+       ., pattern = "\\_", replacement = " "
+       ) %>% 
+     str_replace(
+       ., "TrendSparkline", "Trend"
+       )
+    ) %>% 
+  formatStyle(
+    columns = names(spk_df_fellows),
+    fontSize = "16px"
+  ) %>% 
+  formatStyle(
+    columns = "AY_2023",  
+    backgroundColor = "#ccddff",
+    fontWeight = "Bold"
+  ) %>% 
+  formatRound(
+    columns = c("AY_2018", "AY_2019", "AY_2020", "AY_2021", "AY_2022", "AY_2023"),
+    digits = 0
+  ) %>%
+  spk_add_deps()
+```
+
+**\*Note: Total Applicants for AY 2023 not reported on Match Day.**\
+*Source:* [NRMP.](https://www.nrmp.org/)
+
+#### Takeaway about Matched Fellow Educational Background
+
+```{r}
+test_hc <- 
+  highchart() |> 
+  hc_add_series(
+    data = df_long |> 
+      filter(
+        Variable %in% c(
+          "US MD Matched", "DO Matched", "US-IMG Matched", "IMG Matched", 
+          "Canadian Matched", "Fifth Pathway Matched Matched"
+        )
+      ),
+    type = "streamgraph",
+    hcaes(
+      x = Year, 
+      y = Value, 
+      group = Variable
+    )
+  ) |> 
+  hc_tooltip(
+    sort = TRUE, 
+    table = TRUE 
+  ) |> 
+  hc_yAxis(
+    visible = FALSE
+  )
+
+
+asn_hc_theme <- hc_theme_merge(
+  hc_theme_smpl(),
+  hc_theme(
+    colors  = c("#00468b","#319b42", "#ff8200", "#0077C8", "#FFB500")
+  )
+)
+
+test_hc |>
+  hc_add_theme(asn_hc_theme)
+```
+
+#### Takeaway About Candidates Preferring Nephrology Who Matched
+
+```{r}
+  highchart() |> 
+    hc_add_series(
+      data = df_wide %>% 
+        select(Year, contains("Prefer")) %>% 
+        mutate(
+          `Prefer Neph Match` = `Applicants Prefer Nephrology Matched` / `Applicants Prefer Nephrology`,
+          `Prefer Neph Match` = round(`Prefer Neph Match`, digits = 2) * 100
+          ),
+      type = "area",
+      hcaes(
+        x = Year,
+        y = `Prefer Neph Match`
+      ),
+      name = "Prefer Nephrology Matched"
+    ) |> 
+    hc_yAxis(
+      title = list(text = "Percent"),
+      labels = list(format = "{value}%"),
+      ceiling = 100
+    ) |> 
+    hc_tooltip(
+        valueSuffix = list("%")
+    ) |> 
+    hc_add_theme(
+      hc_theme_merge(
+        hc_theme_smpl(),
+        hc_theme(
+          colors  = c("#0077C8", "#FFB500")
+        )
+      )
+    )
+    # hc_add_theme(asn_hc_theme)
+
+
+```
+
+#### Takeaway about ratio of candidates to positions dropped/rose to 0.X%
+
+```{r}
+highchart() |> 
+  hc_add_series(
+    data = df_wide %>% 
+      select(Year, `Offered Positions`, `Applicants Prefer Nephrology`) %>% 
+        mutate(
+          cand_position_ratio = round(
+            `Applicants Prefer Nephrology` / `Offered Positions`, digits = 2
+            ) 
+          ),
+      type = "area",
+      hcaes(
+        x = Year,
+        y = cand_position_ratio
+      ),
+      name = "Candidate/Position Ratio"
+    ) |> 
+    hc_yAxis(
+      title = list(text = "Ratio")
+    ) |> 
+    hc_tooltip() |> 
+    hc_add_theme(asn_hc_theme)
+```
+
+### Nephrology Training Tracks
+
+TK. This includes a citation to (see [Table 2](#tab2)).
+
+#### Table 2: Trends---Nephrology Match Training Tracks AY 2018--AY 2023 {#tab2}
+
+```{r}
+spk_df_prg <- df_long %>% 
+  filter(
+    between(Year, 2018, 2023),
+    Variable %in% c(
+      "Offered Positions", "Filled Positions", "Unfilled Positions",
+      "Percent Filled Positions", "Offered Tracks", "Filled Tracks",
+      "Unfilled Tracks", "Percent Filled Tracks"  
+      )
+    ) %>% 
+  mutate(
+    Value = case_when(
+      str_detect(Variable, "Percent") == TRUE ~ Value * 100,
+      TRUE ~ Value
+    )
+  ) %>% 
+  group_by(Variable) %>%
+  summarize(
+    TrendSparkline = spk_chr(
+      Value,
+      type = "line",
+      chartRangeMin = 0, 
+      chartRangeMax = max(Value)
+    )
+  )
+
+spk_df_prg <- 
+  df_long %>% 
+  filter(
+    between(Year, 2018, 2023),
+    Variable %in% c(
+      "Offered Positions", "Filled Positions", "Unfilled Positions",
+      "Percent Filled Positions", "Offered Tracks", "Filled Tracks",
+      "Unfilled Tracks", "Percent Filled Tracks"  
+      )
+    ) %>% 
+  mutate(
+    Value = case_when(
+      str_detect(Variable, "Percent") == TRUE ~ Value * 100,
+      TRUE ~ Value
+    ),
+    Year = str_c("AY_", Year)
+  ) %>% 
+  pivot_wider(
+    names_from = Year, 
+    values_from = Value
+  ) %>% 
+  left_join(
+    spk_df_prg
+  ) %>% 
+  mutate(
+    Variable = str_replace(Variable, "Percent", "%")
+    )
+  
+
+ datatable(
+   spk_df_prg, 
+   rownames = FALSE,
+   escape = FALSE, 
+   filter = "none",
+   extensions = "FixedColumns",
+   options = list(
+     paging = FALSE,
+     ordering = FALSE,
+     dom = 't', 
+     initComplete = JS(
+       "function(settings, json) {",
+       "$('body').css({'font-family': 'Gotham'});",
+       "}"
+      )
+     ),
+   colnames = names(spk_df_prg) %>% 
+     str_replace(
+       ., pattern = "\\_", replacement = " "
+       ) %>% 
+     str_replace(
+       ., "TrendSparkline", "Trend"
+       )
+    ) %>% 
+  formatStyle(
+    columns = names(spk_df_prg),
+    fontSize = "16px"
+  ) %>% 
+  formatStyle(
+    columns = "AY_2022",  
+    backgroundColor = "#ccddff",
+    fontWeight = "bold"
+  ) %>% 
+  formatRound(
+    columns = c("AY_2018", "AY_2019", "AY_2020", "AY_2021", "AY_2022", "AY_2023"),
+    digits = 0
+  ) %>%
+  spk_add_deps()
+```
+
+*Source:* [NRMP.](https://www.nrmp.org/)
+
+#### Takeaway about Proportion of Filled Tracks Up/Down 
+
+```{r}
+
+highchart() |> 
+  hc_add_series(
+    data = df_wide %>% 
+      mutate(
+        "Filled Tracks" = `Percent Filled Tracks` * 100
+      ) |> 
+      select(Year, `Filled Tracks`
+      ),
+    hcaes(
+      x = Year, 
+      y = `Filled Tracks`
+    ),
+    type = "column",
+    name = "Filled Tracks"
+  ) |> 
+  hc_yAxis(
+    title = list(text = "Percent"),
+    labels = list(format = "{value}%"),
+    ceiling = 100
+  ) |> 
+  hc_tooltip(
+    valueSuffix = list("%")
+  ) |> 
+  hc_add_theme(
+      hc_theme_merge(
+        hc_theme_smpl(),
+        hc_theme(
+          colors  = c("#0077C8", "#FFB500")
+        )
+      )
+    )
+
+
+
+  
+
+```
+
+#### Takeaway About Number of Training Tracks Filling All Positions
+
+```{r}
+
+highchart() |> 
+  hc_add_series(
+    data = df_long |> 
+      filter(
+        Variable %in% c("Offered Tracks", "Filled Tracks")
+      ),
+    type = "area",
+    hcaes(
+      x = Year, 
+      y = Value, 
+      group = fct_rev(Variable)
+    )
+  ) |> 
+  hc_tooltip(
+    sort = TRUE, 
+    table = TRUE 
+  ) |> 
+  hc_add_theme(
+      hc_theme_merge(
+        hc_theme_smpl(),
+        hc_theme(
+          colors  = c("#0077C8", "#FFB500")
+        )
+      )
+  )
+```
+
+#### Takeaway About Percent of Fellowship Positions Filled, Up/Down X%
+
+```{r}
+highchart() |> 
+  hc_add_series(
+    data = df_wide %>% 
+      mutate(
+        "Filled Positions" = `Percent Filled Positions` * 100
+      ) |> 
+      select(Year, `Filled Positions`
+      ),
+    hcaes(
+      x = Year, 
+      y = `Filled Positions`
+    ),
+    type = "column",
+    name = "Filled Positions"
+  ) |> 
+  hc_yAxis(
+    title = list(text = "Percent"),
+    labels = list(format = "{value}%"),
+    ceiling = 100
+  ) |> 
+  hc_tooltip(
+    valueSuffix = list("%")
+  ) |> 
+  hc_add_theme(
+      hc_theme_merge(
+        hc_theme_smpl(),
+        hc_theme(
+          colors  = c("#0077C8", "#FFB500")
+        )
+      )
+    )
+
+```
+
+#### Takeaway About Positions Up/Down and Gap in Unfilled Positions Narrowing/Widening
+
+```{r}
+highchart() |> 
+  hc_add_series(
+    data = df_long |> 
+      filter(
+        Variable %in% c("Offered Positions", "Filled Positions")
+      ),
+    type = "area",
+    hcaes(
+      x = Year, 
+      y = Value, 
+      group = fct_rev(Variable)
+    )
+  ) |> 
+  hc_tooltip(
+    sort = TRUE, 
+    table = TRUE 
+  ) |> 
+  hc_add_theme(
+      hc_theme_merge(
+        hc_theme_smpl(),
+        hc_theme(
+          colors  = c("#0077C8", "#FFB500")
+        )
+      )
+  )
+```
