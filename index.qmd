@@ -133,19 +133,19 @@ delta_df <-
 
 ## Key Takeaways from the AY 2023 Nephrology Match
 
-A total of **TOTAL MATCHED** candidates matched into nephrology fellowship positions for appointment year (AY 2023), **UP X% FROM/DOWN X% FROM** last year according to data released today by the National Resident Matching Program (NRMP).
+A total of `r delta_df |> filter(Variable == "Total Matched") |> pull(AY_2023)` candidates matched into nephrology fellowship positions for appointment year (AY) 2023, `r if_else(delta_df[14, 3] > delta_df[14, 2], "up", "down")` `r delta_df |> filter(Variable == "Total Matched") |> pull(pct_diff) |> abs() |> scales::percent()` from last year according to data released today by the National Resident Matching Program (NRMP).
 
--   There were **IMG MATCHED** international medical graduates (IMGs) who obtained nephrology positions, **AN INCREASE OF X%/A DECREASE OF X%** over AY 2022. IMGs have comprised the majority of nephrology trainees since 2008.
+-   There were `r delta_df |> filter(Variable == "IMG Matched") |> pull(AY_2023)` international medical graduates (IMGs) who obtained nephrology positions, `r if_else(delta_df[18, 3] > delta_df[18, 2], "an increase", "a decrease")` of `r delta_df |> filter(Variable == "IMG Matched") |> pull(pct_diff) |> abs() |> scales::percent()` over AY 2022. IMGs have comprised the majority of nephrology trainees since 2008.
 
--   Matched osteopathic candidates were **UP X%/DOWN X%** at **DO MATCHED** in AY 2023, **US MD MATCHED** US MDs entered nephrology, and **US-IMG MATCHED** US-IMGs comprised **X%** of all matched fellows this year.
+-   Matched osteopathic candidates were `r if_else(delta_df[16, 3] > delta_df[16, 2], "up", "down")` `r delta_df |> filter(Variable == "DO Matched") |> pull(pct_diff) |> abs() |> scales::percent()` to `r delta_df |> filter(Variable == "DO Matched") |> pull(AY_2023)` residents in AY 2023, `r delta_df |> filter(Variable == "US MD Matched") |> pull(AY_2023)` US MDs entered nephrology as well as `r delta_df |> filter(Variable == "US-IMG Matched") |> pull(AY_2023)` US-IMGs who comprised `r (delta_df[17, 3] / delta_df[14, 3]) |> pull() |> scales::percent()` of all matched fellows this year.
 
--   Of **OFFERED TRACKS** for AY 2023 **PERCENT FILLED TRACKS** filled, with **PERCENT FILLED POSITIONS** of **OFFERED POSITIONS** claimed on Match Day this year.
+-   Of `r delta_df |> filter(Variable == "Offered Tracks") |> pull(AY_2023)` nephrology training tracks offered in AY 2023 `r delta_df |> filter(Variable == "Percent Filled Tracks") |> pull(AY_2023) |> scales::percent()` (`r delta_df |> filter(Variable == "Filled Tracks") |> pull(AY_2023)` tracks) filled, with `r delta_df |> filter(Variable == "Percent Filled Positions") |> pull(AY_2023) |> scales::percent()` of `r delta_df |> filter(Variable == "Offered Positions") |> pull(AY_2023)` positions offered being claimed on Match Day this year.
 
 ## Match Results in Detail
 
 ### Fellows
 
-Of the candidates who preferred nephrology **APPLICANTS PREFER NEPHROLOGY MATCHED** obtained nephrology fellowship positions in AY 2023, out of the total **TOTAL MATCHED** candidates. Allopathic residents entering nephrology **INCREASED/DECLINED X%** from AY 2022, with IMGs **UP/DOWN X%**,DOs **UP/DOWN X%**,and IMGs **UP/DOWN X%** (see [Table 1](#tab1)). The ratio of nephrology candidates **REMAINED STEADY/CHANGED** at **X** candidate/position.
+Of the candidates who preferred nephrology `r delta_df |> filter(Variable == "Applicants Prefer Nephrology Matched") |> pull(AY_2023)` obtained nephrology fellowship positions in AY 2023, out of the total `r delta_df |> filter(Variable == "Total Matched") |> pull(AY_2023)` candidates. Allopathic residents entering nephrology `r if_else(delta_df[15, 3] > delta_df[15, 2], "increased", "declined")` `r delta_df |> filter(Variable == "US MD Matched") |> pull(pct_diff) |> abs() |> scales::percent()` from AY 2022, with IMGs `r if_else(delta_df[18, 3] > delta_df[18, 2], "up", "down")` `r delta_df |> filter(Variable == "IMG Matched") |> pull(pct_diff) |> abs() |> scales::percent()`, DOs `r if_else(delta_df[16, 3] > delta_df[16, 2], "up", "down")` `r delta_df |> filter(Variable == "DO Matched") |> pull(pct_diff) |> abs() |> scales::percent()`, and US-IMGs `r if_else(delta_df[17, 3] > delta_df[17, 2], "up", "down")` `r delta_df |> filter(Variable == "US-IMG Matched") |> pull(pct_diff) |> abs() |> scales::percent()` (see [Table 1](#tab1)). The ratio of nephrology candidates `r if_else((delta_df[10, 3] / delta_df[1, 3]) == 0.7, "remained steady at", "changed to")` `r (delta_df[10, 3] / delta_df[1, 3]) |> round(digits = 2)` candidate/position.
 
 #### Table 1: Nephrology Candidate Trends AY 2018--AY 2023\* {#tab1}
 
@@ -278,7 +278,7 @@ test_hc |>
   hc_add_theme(asn_hc_theme)
 ```
 
-#### PERCENT APPLICANTS PREFERRING NEPHROLOGY MATCHED of Candidates Preferring Nephrology Matched in AY 2023
+#### `r (delta_df[11, 3] / delta_df[10, 3]) |> pull() |> scales::percent()` of Candidates Preferring Nephrology Matched in AY 2023
 
 ```{r}
   highchart() |> 
@@ -317,7 +317,7 @@ test_hc |>
 
 ```
 
-#### The Ratio of Nephrology Candidates to Available Nephrology Positions **DROPPED**/ROSE to TOTAL MATCHED / OFFERED POSITIONS
+#### The Ratio of Nephrology Candidates to Available Nephrology Positions `r if_else((delta_df[10, 3] / delta_df[1, 3]) == 0.7, "Remained Steady at", "Changed To")` `r (delta_df[10, 3] / delta_df[1, 3]) |> round(digits = 2)`
 
 ```{r}
 highchart() |> 
@@ -345,7 +345,7 @@ highchart() |>
 
 ### Nephrology Training Tracks
 
-In AY 2023, **OFFERED TRACKS** were offered in the nephrology Match, of which **PERCENT FILLED TRACKS** filled all of their available slots. There were `r delta_df |> filter(Variable == "Offered Positions") |> pull(AY_2023)` positions offered in the AY 2023 nephrology Match, `r if_else(delta_df[1, 3] > delta_df[1, 2], "an increase", "a decrease")` of `r delta_df |> filter(Variable == "Offered Positions") |> pull(pct_diff) |> abs() |> scales::percent()` over AY 2022 (see [Table 2](#tab2)).
+In AY 2023, `r delta_df |> filter(Variable == "Offered Tracks") |> pull(AY_2023)` were offered in the nephrology Match, of which `r delta_df |> filter(Variable == "Percent Filled Tracks") |> pull(AY_2023) |> scales::percent()` filled all of their available slots. There were `r delta_df |> filter(Variable == "Offered Positions") |> pull(AY_2023)` positions offered in the AY 2023 nephrology Match, `r if_else(delta_df[1, 3] > delta_df[1, 2], "an increase", "a decrease")` of `r delta_df |> filter(Variable == "Offered Positions") |> pull(pct_diff) |> abs() |> scales::percent()` over AY 2022 (see [Table 2](#tab2)).
 
 #### Table 2: Trends---Nephrology Match Training Tracks AY 2018--AY 2023 {#tab2}
 
@@ -446,7 +446,7 @@ spk_df_prg <-
 
 *Source:* [NRMP.](https://www.nrmp.org/)
 
-#### Proportion of Filled Training Tracks INCREASED/DECREASED in AY 2023
+#### Proportion of Filled Training Tracks `r if_else((delta_df[8, 3] > delta_df[8, 2]), "Increased", "Decreased")` in AY 2023
 
 ```{r}
 
@@ -481,14 +481,9 @@ highchart() |>
         )
       )
     )
-
-
-
-  
-
 ```
 
-#### FILLED TRACKS Training Tracks Filled All Fellowship Positions
+#### `r delta_df |> filter(Variable == "Filled Tracks") |> pull(AY_2023)`  Training Tracks Filled All Fellowship Positions
 
 ```{r}
 
