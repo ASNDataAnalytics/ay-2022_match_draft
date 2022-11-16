@@ -114,3 +114,18 @@ df_long |>
       "Canadian Matched", "Fifth Pathway Matched Matched"
       )
     )
+
+
+## Testing a Change Table  -----
+
+
+test_df <- 
+  df |> 
+  select(1, 15, 16)
+
+test_df |> 
+  rowwise() |> 
+  mutate( 
+    pct_diff = (AY_2023 - AY_2022) / AY_2022
+  )
+    

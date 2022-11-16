@@ -1,5 +1,5 @@
 ---
-title: "AY 2022 Match"
+title: "AY 2023 Match"
 author: 
   name: "Kurtis A. Pivert, MS"
   orcid: 0000-0002-3428-2427
@@ -111,23 +111,41 @@ pct_norm <- function(x) {
 }
 ```
 
-## Executive Summary
+```{r}
+## Testing a Change Table  -----
 
-TK.
+delta_df <- 
+  df |> 
+  select(1, 15, 16) |> 
+  rowwise() |> 
+  mutate( 
+    pct_diff = round(
+      (AY_2023 - AY_2022) / AY_2022,
+      digits = 2
+    )
+  ) 
+  
+#   
+# delta_df |> 
+#   flextable::flextable() |> 
+#   flextable::save_as_docx(path = "delta_table.docx")
+```
 
-### AY 2023 Match Key Data Points
+## Key Takeaways from the AY 2023 Nephrology Match
 
--   One
+A total of **TOTAL MATCHED** candidates matched into nephrology fellowship positions for appointment year (AY 2023), **UP X% FROM/DOWN X% FROM** last year according to data released today by the National Resident Matching Program (NRMP).
 
--   Two
+-   There were **IMG MATCHED** international medical graduates (IMGs) who obtained nephrology positions, **AN INCREASE OF X%/A DECREASE OF X%** over AY 2022. IMGs have comprised the majority of nephrology trainees since 2008.
 
--   Three
+-   Matched osteopathic candidates were **UP X%/DOWN X%** at **DO MATCHED** in AY 2023, **US MD MATCHED** US MDs entered nephrology, and **US-IMG MATCHED** US-IMGs comprised **X%** of all matched fellows this year.
+
+-   Of **OFFERED TRACKS** for AY 2023 **PERCENT FILLED TRACKS** filled, with **PERCENT FILLED POSITIONS** of **OFFERED POSITIONS** claimed on Match Day this year.
 
 ## Match Results in Detail
 
 ### Fellows
 
-TK. This includes a citation to (see [Table 1](#tab1)).
+Of the candidates who preferred nephrology **APPLICANTS PREFER NEPHROLOGY MATCHED** obtained nephrology fellowship positions in AY 2023, out of the total **TOTAL MATCHED** candidates. Allopathic residents entering nephrology **INCREASED/DECLINED X%** from AY 2022, with IMGs **UP/DOWN X%**,DOs **UP/DOWN X%**,and IMGs **UP/DOWN X%** (see [Table 1](#tab1)). The ratio of nephrology candidates **REMAINED STEADY/CHANGED** at **X** candidate/position.
 
 #### Table 1: Nephrology Candidate Trends AY 2018--AY 2023\* {#tab1}
 
@@ -260,7 +278,7 @@ test_hc |>
   hc_add_theme(asn_hc_theme)
 ```
 
-#### Takeaway About Candidates Preferring Nephrology Who Matched
+#### PERCENT APPLICANTS PREFERRING NEPHROLOGY MATCHED of Candidates Preferring Nephrology Matched in AY 2023
 
 ```{r}
   highchart() |> 
@@ -299,7 +317,7 @@ test_hc |>
 
 ```
 
-#### Takeaway about ratio of candidates to positions dropped/rose to 0.X%
+#### The Ratio of Nephrology Candidates to Available Nephrology Positions **DROPPED**/ROSE to TOTAL MATCHED / OFFERED POSITIONS
 
 ```{r}
 highchart() |> 
@@ -327,7 +345,7 @@ highchart() |>
 
 ### Nephrology Training Tracks
 
-TK. This includes a citation to (see [Table 2](#tab2)).
+In AY 2023, **OFFERED TRACKS** were offered in the nephrology Match, of which **PERCENT FILLED TRACKS** filled all of their available slots. There were `r delta_df |> filter(Variable == "Offered Positions") |> pull(AY_2023)` positions offered in the AY 2023 nephrology Match, `r if_else(delta_df[1, 3] > delta_df[1, 2], "an increase", "a decrease")` of `r delta_df |> filter(Variable == "Offered Positions") |> pull(pct_diff) |> abs() |> scales::percent()` over AY 2022 (see [Table 2](#tab2)).
 
 #### Table 2: Trends---Nephrology Match Training Tracks AY 2018--AY 2023 {#tab2}
 
@@ -428,7 +446,7 @@ spk_df_prg <-
 
 *Source:* [NRMP.](https://www.nrmp.org/)
 
-#### Takeaway about Proportion of Filled Tracks Up/Down 
+#### Proportion of Filled Training Tracks INCREASED/DECREASED in AY 2023
 
 ```{r}
 
@@ -470,7 +488,7 @@ highchart() |>
 
 ```
 
-#### Takeaway About Number of Training Tracks Filling All Positions
+#### FILLED TRACKS Training Tracks Filled All Fellowship Positions
 
 ```{r}
 
@@ -501,7 +519,7 @@ highchart() |>
   )
 ```
 
-#### Takeaway About Percent of Fellowship Positions Filled, Up/Down X%
+#### PERCENT FILLED POSITIONS of Fellowship Positions Filled, Up/Down X%
 
 ```{r}
 highchart() |> 
@@ -538,7 +556,7 @@ highchart() |>
 
 ```
 
-#### Takeaway About Positions Up/Down and Gap in Unfilled Positions Narrowing/Widening
+#### Offered Positions Were UP/DOWN with UNFILLED POSITIONS Unfilled on Match Day
 
 ```{r}
 highchart() |> 
